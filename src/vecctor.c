@@ -7,7 +7,7 @@
 
 inline Result(void) vector_push_back(struct vector_t *Vector, void *Value)
 	{
-		struct Error_t error = {};
+		struct Error_t error = {0};
 		Vector->data = realloc(Vector->data, Vector->size+1 * sizeof(void *));
 		if (Vector->data == NULL)
 		{
@@ -37,7 +37,7 @@ inline Result(void) vector_push(struct vector_t* Vector, void* Value, size_t Ind
 
 inline Result(void) vector_remove(struct vector_t *Vector, size_t Index)
 	{
-		struct Error_t error = {};
+		struct Error_t error = {0};
 		if(Index < Vector->size)
 			{
 				error.line = __LINE__;
