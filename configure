@@ -1,0 +1,133 @@
+#!/bin/bash
+
+# Check for required tools
+echo "Checking for required tools..."
+echo "Checking for gcc..."
+command -v gcc >/dev/null 2>&1 || { echo >&2 "GCC is required but not found. Aborting."; exit 1; }
+echo "Checking for make..."
+command -v make >/dev/null 2>&1 || { echo >&2 "Make is required but not found. Aborting."; exit 1; }
+
+# Default values
+CC=gcc
+CFLAGS="-Wall -Wextra -Wconversion -Wsign-conversion -Wpedantic -pipe"
+DEBUG="-g"
+RELEASE="-Ofast"
+STD="-std=gnu2x"
+
+SOURCE_FILES="" # List of source files # TODO: make this a list of files
+LIBS="glfw3 cglm vulkan"
+
+# Parse command line options
+while [ $# -gt 0 ]; do
+    case "$1" in
+        --help | -h)
+            echo "Usage: ./configure [OPTIONS]"
+            echo "Options:"
+            echo "  --help |        Show this help message"
+            echo "  -h"
+            echo "  --cc=COMPILER  Specify the C compiler (default: gcc)"
+            echo "  --cflags=FLAGS  Specify additional C compiler flags (default: -Wall -Wextra -Wconversion -Wsign-conversion -Wpedantic -pipe)"
+            echo "  --debug |       Enable debugging (default: on)"
+            echo "  -d"
+            echo "  --no-debug      Disable debugging (default: off)"
+            echo "  --release |     Enable some release flags (default: true)"
+            echo "  -r"
+            echo "  --Werror        Enable Werror = treat warnings as errors (default: off)"
+            echo "  --std=STD       Specify the standard to use (default: C 23 + gnu extentions)"
+            exit 0
+            ;;
+        --cc=*)
+            CC="${1#*=}"
+            ;;
+        --cflags=*)
+            CFLAGS="${1#*=}"
+            ;;
+        --debug | -d)
+            DEBUG="-g"
+            ;;
+        --no-debug)
+            DEBUG="-DNDEBUG"
+            ;;
+        --release | -r)
+            RELEASE="-Ofast"
+            ;;
+        --Werror)
+            CFLAGS="$CFLAGS -Werror"
+            ;;
+        --std=*)
+            STD="-std=${1#*=}"
+            ;;
+        *)
+            echo "Unknown option: $1. Use --help for usage instructions."
+            exit 1
+            ;;
+    esac
+    shift
+done
+
+echo "Using compiler: $CC"
+echo "Using CFLAGS: $CFLAGS"
+echo "Using DEBUG: $DEBUG"
+echo "Using RELEASE: $RELEASE"
+echo "Using STD: $STD"
+
+CFLAGS="$CFLAGS $DEBUG $RELEASE $STD"
+
+echo "final compiler flags: $CFLAGS"
+
+SRCS=src/*.c
+SRCS_PROCESSED=""
+for file in $SRCS; do
+    # Append processed file name to SRCS_PROCESSED
+    SRCS_PROCESSED="$SRCS_PROCESSED $file"
+done
+
+# Generate Makefile
+cat > Makefile <<EOF
+# Compiler and flags
+CC = $CC
+CFLAGS ?= $CFLAGS # $(pkg-config --cflags $LIBS)
+LDFLAGS ?= -Iinclude # $(pkg-config --libs $LIBS)
+
+# Target executable
+TARGET = libvecctor.a
+
+# Source files
+SRCS =$SRCS_PROCESSED
+
+# Object files
+OBJS = \$(SRCS:src/%.c=build/%.o)
+
+# Default target
+all: \${OBJS} \$(TARGET)
+	@echo "all done"
+
+# Rebuild the target
+rebuild: clean | all
+	@echo "rebuild done" 
+
+# Build target
+\$(TARGET): \$(OBJS)
+    	# make the library object
+	ar rcs \$@ \$<
+
+# Compile source files
+build/%.o: src/%.c
+	@mkdir -p \$(dir \$@)
+	\$(CC) \$(CFLAGS) -c \$< -o \$@ \${LDFLAGS}
+
+# Run the executable
+run : all
+	@./\${BINARY}
+
+# Clean target
+clean:
+	rm -f \$(OBJS) \$(TARGET)
+
+# Clean the directory for distribution
+distclean: clean
+	rm -rf build Makefile
+EOF
+
+echo "Configure script completed successfully!"
+exit 0
