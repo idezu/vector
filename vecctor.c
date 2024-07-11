@@ -117,8 +117,8 @@ VECResult add_vecctor_overlap(void** vecctor_void, void* elements, uint32_t nbEl
 		{
 		    return VEC_SUCCESS;
 		}
-		VECMetadata* vecctor = (VECMetadata*)*vecctor_void;
 		// get the metadata
+		VECMetadata* vecctor = (VECMetadata*)*vecctor_void;
 		vecctor--;
 
 		// get the poolsize necessary for the data
@@ -175,6 +175,6 @@ void* create_vecctor(void *elements, uint32_t nbElements, uint32_t sizeOfType)
 void destroy_vecctor(void* vecctor_void)
 	{
 		VECMetadata* vecctor = (VECMetadata*)vecctor_void;
-		vecctor --;
+		vecctor--;
 		free(vecctor);
 	}
