@@ -1,4 +1,4 @@
-project('vecctor', 'c', default_options:['warning_level=everything', 'b_lto=true', 'c_std=c2x'])
+project('vecctor', 'c', version: '0.0.1', default_options:['warning_level=everything', 'b_lto=true', 'c_std=c2x'])
 
 incdir = include_directories('include')
 
