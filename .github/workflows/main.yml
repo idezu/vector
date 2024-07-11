@@ -18,7 +18,7 @@ jobs:
           directory: build
           setup-options: -Db_coverage=true
           options: --verbose
-          meson-version: 0.53.2
+          meson-version: 1.0.0
           ninja-version: 1.9.0.post1
           gcovr-version: 4.2
   
