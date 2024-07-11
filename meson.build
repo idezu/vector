@@ -13,4 +13,4 @@ subdir('examples')
 
 subdir('tests')
 
-test('name of test', tests)
+test('normal use', tests)
